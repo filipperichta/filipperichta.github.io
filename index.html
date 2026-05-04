@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filip Perichta — Security Analyst & Detection Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0f1e;
+    --navy-mid: #0f1729;
+    --navy-light: #1a2440;
+    --navy-border: #1e2d4a;
+    --blue: #2563eb;
+    --blue-bright: #3b82f6;
+    --blue-glow: rgba(59,130,246,0.12);
+    --cyan: #06b6d4;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --white: #f0f4ff;
+    --white-dim: #8899bb;
+    --white-dimmer: #3d5275;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,15,30,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--blue-bright);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-logo span { color: var(--white-dim); }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white-dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--blue-bright); }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-inner {
+    max-width: 800px;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--cyan);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(52px, 8vw, 88px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--white);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--blue-bright);
+  }
+
+  .hero-subtitle {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--white-dim);
+    margin-bottom: 40px;
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+
+  .hero-subtitle strong {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--white-dim);
+    max-width: 580px;
+    margin-bottom: 48px;
+    line-height: 1.75;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--blue);
+    color: white;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--blue);
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-bright);
+    border-color: var(--blue-bright);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: transparent;
+    color: var(--white-dim);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--navy-border);
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--blue-bright);
+    color: var(--blue-bright);
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    position: relative;
+    z-index: 1;
+    background: var(--navy-mid);
+    border-top: 1px solid var(--navy-border);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 0 48px;
+    border-right: 1px solid var(--navy-border);
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 36px;
+    color: var(--blue-bright);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 48px 48px;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--blue-bright);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-tag::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--blue-bright);
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--white);
+  }
+
+  h2 em {
+    font-style: italic;
+    color: var(--blue-bright);
+  }
+
+  /* ── LAB SECTION ── */
+  #lab {
+    padding-bottom: 80px;
+  }
+
+  .scenarios-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--navy-border);
+    border: 1px solid var(--navy-border);
+  }
+
+  .scenario-card {
+    background: var(--navy-mid);
+    padding: 40px 36px;
+    position: relative;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+
+  .scenario-card:hover {
+    background: var(--navy-light);
+  }
+
+  .scenario-card:hover .scenario-arrow {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  .scenario-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .scenario-tactic {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    margin-bottom: 20px;
+    border: 1px solid;
+  }
+
+  .tactic-execution { color: var(--amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+  .tactic-persistence { color: var(--cyan); border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); }
+  .tactic-credential { color: var(--red); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+
+  .scenario-title {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .scenario-subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--blue-bright);
+    margin-bottom: 20px;
+  }
+
+  .scenario-desc {
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+
+  .scenario-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .chain-step {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .chain-step::before {
+    content: '→';
+    color: var(--blue-bright);
+    font-size: 10px;
+  }
+
+  .chain-step:first-child::before { content: ''; width: 0; }
+
+  .scenario-rule {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 14px;
+    background: var(--navy);
+    border-left: 2px solid var(--blue);
+    color: var(--white-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .rule-level {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .level-12 { background: rgba(239,68,68,0.15); color: var(--red); }
+  .level-6 { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+  .scenario-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--blue-bright);
+    font-size: 16px;
+    opacity: 0;
+    transition: all 0.2s;
+  }
+
+  /* ── DETECTION CHAIN VISUAL ── */
+  .chain-visual {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  .chain-visual-inner {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    padding: 40px;
+  }
+
+  .chain-visual-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .chain-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    row-gap: 16px;
+  }
+
+  .chain-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 110px;
+  }
+
+  .chain-icon {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--navy-border);
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    position: relative;
+  }
+
+  .chain-icon.active {
+    border-color: var(--blue);
+    background: var(--blue-glow);
+  }
+
+  .chain-icon.active::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+
+  .chain-node-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .chain-node-sub {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--blue-bright);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .chain-arrow {
+    color: var(--blue-bright);
+    font-size: 20px;
+    padding: 0 8px;
+    flex-shrink: 0;
+    margin-top: -16px;
+  }
+
+  /* ── EXPERIENCE SECTION ── */
+  #experience { padding-bottom: 80px; }
+
+  .experience-list {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  .exp-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .exp-item:last-child { border-bottom: none; }
+
+  .exp-meta { padding-top: 4px; }
+
+  .exp-dates {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .exp-company {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--blue-bright);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .exp-location {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.06em;
+  }
+
+  .exp-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .exp-desc {
+    font-size: 14px;
+    color: var(--white-dim);
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .exp-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .exp-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--navy-border);
+    color: var(--white-dimmer);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── SKILLS SECTION ── */
+  #skills { padding-bottom: 80px; }
+
+  .skills-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--navy-border);
+    border: 1px solid var(--navy-border);
+  }
+
+  .skill-group {
+    background: var(--navy-mid);
+    padding: 32px;
+  }
+
+  .skill-group-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--blue-bright);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--navy-border);
+  }
+
+  .skill-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .skill-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white);
+  }
+
+  .skill-level {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .level-production { color: var(--green); border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+  .level-lab { color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); }
+
+  /* ── CERTS SECTION ── */
+  #certifications { padding-bottom: 80px; }
+
+  .certs-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .cert-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cert-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+  }
+
+  .cert-card.featured::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+
+  .cert-icon { font-size: 28px; margin-bottom: 16px; }
+
+  .cert-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .cert-issuer {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── CONTACT SECTION ── */
+  #contact {
+    padding: 80px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .contact-inner {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    padding: 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .contact-text h2 { margin-bottom: 20px; }
+
+  .contact-text p {
+    font-size: 15px;
+    color: var(--white-dim);
+    line-height: 1.75;
+    margin-bottom: 32px;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--navy);
+    border: 1px solid var(--navy-border);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .contact-link:hover {
+    border-color: var(--blue-bright);
+    background: var(--blue-glow);
+  }
+
+  .contact-link-icon {
+    font-size: 18px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .contact-link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .contact-link-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-dimmer);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .contact-link-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white);
+  }
+
+  /* ── AVAILABILITY BADGE ── */
+  .availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25);
+    margin-bottom: 24px;
+  }
+
+  .availability-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .availability-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--navy-border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-dimmer);
+  }
+
+  .footer-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-dimmer);
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    #hero { padding: 100px 24px 60px; }
+    .stats-bar { padding: 20px 24px; gap: 0; }
+    .stat { padding: 0 20px; }
+    .section-header { padding: 60px 24px 36px; }
+    .scenarios-grid { grid-template-columns: 1fr; padding: 0 24px; }
+    .chain-visual { padding: 0 24px 60px; }
+    .experience-list { padding: 0 24px; }
+    .exp-item { grid-template-columns: 1fr; gap: 16px; }
+    .skills-grid { grid-template-columns: 1fr; padding: 0 24px; }
+    .certs-grid { grid-template-columns: 1fr; padding: 0 24px; }
+    #contact { padding: 60px 24px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 40px; padding: 36px; }
+    footer { padding: 20px 24px; }
+    .chain-flow { gap: 0; row-gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">fp<span>://</span>security</div>
+  <ul class="nav-links">
+    <li><a href="#lab">Lab</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Security Analyst · Detection Engineer · GCIH</div>
+    <h1>Filip<br><em>Perichta</em></h1>
+    <div class="hero-subtitle">
+      <strong>17+ years</strong> in IT &amp; security &nbsp;·&nbsp;
+      <strong>Doha, Qatar</strong> &nbsp;·&nbsp;
+      <strong>EU eligible</strong> (Slovak citizen)
+    </div>
+    <p class="hero-desc">
+      Incident response and vulnerability management specialist with hands-on detection engineering experience.
+      Built a full SOC lab covering adversary simulation, custom Splunk detections, Wazuh telemetry, and Shuffle SOAR automation.
+    </p>
+    <div class="availability">
+      <div class="availability-dot"></div>
+      <span class="availability-text">Available Immediately · On-site · Hybrid · Remote</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#lab" class="btn-primary">↓ View Lab Work</a>
+      <a href="https://github.com/filipperichta/soar-lab-security" target="_blank" class="btn-secondary">⬡ GitHub</a>
+      <a href="https://linkedin.com/in/filip-perichta-66819515a" target="_blank" class="btn-secondary">in LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-num">17+</span>
+    <span class="stat-label">Years IT &amp; Security</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">30k+</span>
+    <span class="stat-label">Assets Scanned</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">3</span>
+    <span class="stat-label">ATT&amp;CK Scenarios</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">GCIH</span>
+    <span class="stat-label">GIAC Certified</span>
+  </div>
+</div>
+
+<!-- LAB SECTION -->
+<section id="lab">
+  <div class="section-header fade-up">
+    <div class="section-tag">SOC Engineering Lab</div>
+    <h2>Detection<br><em>Engineering</em></h2>
+  </div>
+
+  <div class="scenarios-grid">
+
+    <!-- T1059 -->
+    <a class="scenario-card fade-up" href="https://github.com/filipperichta/soar-lab-security" target="_blank">
+      <span class="scenario-arrow">↗</span>
+      <div class="scenario-num">Scenario 01 / 03</div>
+      <div class="scenario-tactic tactic-execution">Execution</div>
+      <div class="scenario-title">T1059.001</div>
+      <div class="scenario-subtitle">PowerShell Script Block Execution</div>
+      <p class="scenario-desc">
+        Simulated adversary PowerShell abuse using Atomic Red Team. Captured full scriptBlockText via Windows Event ID 4104 and fired Wazuh rules 91822/91809 within 2 seconds.
+      </p>
+      <div class="scenario-chain">
+        <div class="chain-step">Atomic Red Team — Invoke-AtomicTest T1059.001</div>
+        <div class="chain-step">Windows Event ID 4104 (Script Block Logging)</div>
+        <div class="chain-step">Wazuh Rules 91822 / 91809</div>
+        <div class="chain-step">Splunk Real-Time Alert → Webhook</div>
+        <div class="chain-step">Shuffle SOAR → Gmail Analyst Notification</div>
+      </div>
+      <div class="scenario-rule">
+        <span>Rule 91822 — Invoke-Command detected</span>
+        <span class="rule-level level-12">Level 12</span>
+      </div>
+    </a>
+
+    <!-- T1547 -->
+    <a class="scenario-card fade-up" href="https://github.com/filipperichta/soar-lab-security" target="_blank">
+      <span class="scenario-arrow">↗</span>
+      <div class="scenario-num">Scenario 02 / 03</div>
+      <div class="scenario-tactic tactic-persistence">Persistence</div>
+      <div class="scenario-title">T1547.001</div>
+      <div class="scenario-subtitle">Registry Run Key Persistence</div>
+      <p class="scenario-desc">
+        Simulated malware persistence via HKCU Run key using reg.exe. Sysmon Event ID 13 captured the exact registry path and payload written, detected within 1 second.
+      </p>
+      <div class="scenario-chain">
+        <div class="chain-step">Atomic Red Team — Invoke-AtomicTest T1547.001</div>
+        <div class="chain-step">Sysmon Event ID 13 (RegistryEvent Value Set)</div>
+        <div class="chain-step">Wazuh Rule 92302</div>
+        <div class="chain-step">Splunk Real-Time Alert → Webhook</div>
+        <div class="chain-step">Shuffle SOAR → Gmail with Registry Key + Payload</div>
+      </div>
+      <div class="scenario-rule">
+        <span>Rule 92302 — Run key modified via reg.exe</span>
+        <span class="rule-level level-6">Level 6</span>
+      </div>
+    </a>
+
+    <!-- T1003 -->
+    <a class="scenario-card fade-up" href="https://github.com/filipperichta/soar-lab-security" target="_blank">
+      <span class="scenario-arrow">↗</span>
+      <div class="scenario-num">Scenario 03 / 03</div>
+      <div class="scenario-tactic tactic-credential">Credential Access</div>
+      <div class="scenario-title">T1003.001</div>
+      <div class="scenario-subtitle">LSASS Memory Dump</div>
+      <p class="scenario-desc">
+        Dumped LSASS memory via comsvcs.dll LOLBin (rundll32.exe). Initial procdump attempt blocked by Defender as HackTool:Win32/DumpLsass.E — demonstrating defense-in-depth.
+      </p>
+      <div class="scenario-chain">
+        <div class="chain-step">comsvcs.dll MiniDump via rundll32.exe</div>
+        <div class="chain-step">Sysmon Event ID 10 (ProcessAccess)</div>
+        <div class="chain-step">Wazuh Rule 92900</div>
+        <div class="chain-step">Splunk Real-Time Alert → Webhook</div>
+        <div class="chain-step">Shuffle SOAR → High-Severity Analyst Alert</div>
+      </div>
+      <div class="scenario-rule">
+        <span>Rule 92900 — LSASS accessed, credential dump</span>
+        <span class="rule-level level-12">Level 12</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Detection Chain Visual -->
+  <div class="chain-visual fade-up" style="margin-top: 16px;">
+    <div class="chain-visual-inner">
+      <div class="chain-visual-title">// Full Detection Chain</div>
+      <div class="chain-flow">
+        <div class="chain-node">
+          <div class="chain-icon active">⚡</div>
+          <div class="chain-node-label">Atomic Red</div>
+          <div class="chain-node-sub">ART Simulation</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node">
+          <div class="chain-icon active">👁</div>
+          <div class="chain-node-label">Sysmon</div>
+          <div class="chain-node-sub">EID 10/13/4104</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node">
+          <div class="chain-icon active">🛡</div>
+          <div class="chain-node-label">Wazuh</div>
+          <div class="chain-node-sub">Rule Engine</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node">
+          <div class="chain-icon active">📊</div>
+          <div class="chain-node-label">Splunk</div>
+          <div class="chain-node-sub">SPL Detection</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node">
+          <div class="chain-icon active">⚙</div>
+          <div class="chain-node-label">Shuffle</div>
+          <div class="chain-node-sub">SOAR Playbook</div>
+        </div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node">
+          <div class="chain-icon active">📧</div>
+          <div class="chain-node-label">Analyst</div>
+          <div class="chain-node-sub">Email Alert</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE SECTION -->
+<section id="experience">
+  <div class="section-header fade-up">
+    <div class="section-tag">Career</div>
+    <h2>17 Years of<br><em>Experience</em></h2>
+  </div>
+
+  <div class="experience-list">
+
+    <div class="exp-item fade-up">
+      <div class="exp-meta">
+        <div class="exp-dates">Oct 2022 — Sep 2024</div>
+        <div class="exp-company">onsemi</div>
+        <div class="exp-location">Remote / Global</div>
+      </div>
+      <div class="exp-content">
+        <div class="exp-title">Senior Security Analyst</div>
+        <p class="exp-desc">
+          Built and scaled enterprise vulnerability scanning infrastructure from the ground up using Rapid7 InsightVM — growing coverage to <strong>30,000+ assets across 12 sites in 7 countries</strong>. Led a public-facing asset discovery project by developing custom bash tooling to extract externally-exposed assets from Palo Alto Panorama firewall rules, identifying untracked systems and driving remediation without a formal CISO-defined process. Performed threat hunting and incident response using Palo Alto Cortex XDR and XSOAR.
+        </p>
+        <div class="exp-tags">
+          <span class="exp-tag">Rapid7 InsightVM</span>
+          <span class="exp-tag">Palo Alto XDR</span>
+          <span class="exp-tag">XSOAR</span>
+          <span class="exp-tag">Panorama</span>
+          <span class="exp-tag">Threat Hunting</span>
+          <span class="exp-tag">Bash</span>
+          <span class="exp-tag">IR</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item fade-up">
+      <div class="exp-meta">
+        <div class="exp-dates">Jan 2019 — Oct 2022</div>
+        <div class="exp-company">Innovatrics</div>
+        <div class="exp-location">Banská Bystrica, SK</div>
+      </div>
+      <div class="exp-content">
+        <div class="exp-title">Application Support Specialist</div>
+        <p class="exp-desc">
+          Managed deployment, patching, and vulnerability remediation across biometric identity platforms. Built testing and production environments using Vagrant, Terraform, and ESXi. Created GitLab CI/CD pipelines for infrastructure automation using Bash and Ansible.
+        </p>
+        <div class="exp-tags">
+          <span class="exp-tag">Terraform</span>
+          <span class="exp-tag">Ansible</span>
+          <span class="exp-tag">Docker</span>
+          <span class="exp-tag">Vagrant</span>
+          <span class="exp-tag">AWS</span>
+          <span class="exp-tag">GitLab CI/CD</span>
+          <span class="exp-tag">Linux</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item fade-up">
+      <div class="exp-meta">
+        <div class="exp-dates">Aug 2011 — Jan 2019</div>
+        <div class="exp-company">Nokia</div>
+        <div class="exp-location">Banská Bystrica, SK</div>
+      </div>
+      <div class="exp-content">
+        <div class="exp-title">L2/L3 RAN Support Engineer</div>
+        <p class="exp-desc">
+          L2/L3 support for Nokia LTE base stations and NPO platform across EMEA. Upgrades, integration, configuration, and incident handling. Certified NCSS LTE RA and Alcatel-Lucent Certified Professional LTE RAN.
+        </p>
+        <div class="exp-tags">
+          <span class="exp-tag">LTE/RAN</span>
+          <span class="exp-tag">RedHat</span>
+          <span class="exp-tag">Oracle</span>
+          <span class="exp-tag">EMEA Support</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item fade-up">
+      <div class="exp-meta">
+        <div class="exp-dates">May 2008 — Jul 2011</div>
+        <div class="exp-company">HP</div>
+        <div class="exp-location">Bratislava, SK</div>
+      </div>
+      <div class="exp-content">
+        <div class="exp-title">3rd Line UNIX Delivery Lead</div>
+        <p class="exp-desc">
+          Led UNIX/Linux and storage platform support for enterprise customers (GM Europe, Novartis, Bunge) in ITIL v3 / SOX compliant environment. Managed HP-UX, SUSE Linux, high-availability ServiceGuard clusters, and SAN infrastructure.
+        </p>
+        <div class="exp-tags">
+          <span class="exp-tag">HP-UX</span>
+          <span class="exp-tag">SUSE Linux</span>
+          <span class="exp-tag">SAN/EMC</span>
+          <span class="exp-tag">ITIL v3</span>
+          <span class="exp-tag">SOX</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS SECTION -->
+<section id="skills">
+  <div class="section-header fade-up">
+    <div class="section-tag">Technical Skills</div>
+    <h2>Tools &amp;<br><em>Capabilities</em></h2>
+  </div>
+
+  <div class="skills-grid">
+    <div class="skill-group fade-up">
+      <div class="skill-group-title">// Security — Production Experience</div>
+      <div class="skill-items">
+        <div class="skill-item">
+          <span class="skill-name">Rapid7 InsightVM</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Palo Alto Cortex XDR</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Palo Alto XSOAR</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Palo Alto Panorama</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Incident Response (GCIH)</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="skill-group fade-up">
+      <div class="skill-group-title">// Detection Engineering — Lab Built</div>
+      <div class="skill-items">
+        <div class="skill-item">
+          <span class="skill-name">Splunk (SPL, Real-time Alerts)</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Wazuh (Agent, Rules, Forwarding)</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Sysmon (SwiftOnSecurity config)</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Shuffle SOAR (Playbooks)</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Atomic Red Team / MITRE ATT&amp;CK</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="skill-group fade-up">
+      <div class="skill-group-title">// Infrastructure</div>
+      <div class="skill-items">
+        <div class="skill-item">
+          <span class="skill-name">Linux (RedHat, Ubuntu, HP-UX)</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Docker / Docker Compose</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Terraform</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Ansible</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">Vagrant / VirtualBox</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="skill-group fade-up">
+      <div class="skill-group-title">// Scripting &amp; Cloud</div>
+      <div class="skill-items">
+        <div class="skill-item">
+          <span class="skill-name">Bash</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">PowerShell</span>
+          <span class="skill-level level-lab">Lab</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">AWS (EC2, S3, CloudWatch)</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+        <div class="skill-item">
+          <span class="skill-name">GitLab CI/CD</span>
+          <span class="skill-level level-production">Production</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-header fade-up">
+    <div class="section-tag">Credentials</div>
+    <h2>Certifications &amp;<br><em>Education</em></h2>
+  </div>
+
+  <div class="certs-grid">
+    <div class="cert-card featured fade-up">
+      <div class="cert-icon">🛡️</div>
+      <div class="cert-name">GIAC Certified Incident Handler (GCIH)</div>
+      <div class="cert-issuer">GIAC · Advisory Board Member</div>
+    </div>
+    <div class="cert-card fade-up">
+      <div class="cert-icon">🎓</div>
+      <div class="cert-name">BA in Computer Science</div>
+      <div class="cert-issuer">Thomas Edison State University · June 2026</div>
+    </div>
+    <div class="cert-card fade-up">
+      <div class="cert-icon">📡</div>
+      <div class="cert-name">Nokia NCSS LTE RA · AL-LTE Certified Professional</div>
+      <div class="cert-issuer">Nokia / Alcatel-Lucent</div>
+    </div>
+    <div class="cert-card fade-up">
+      <div class="cert-icon">☁️</div>
+      <div class="cert-name">Terraform for Absolute Beginners</div>
+      <div class="cert-issuer">KodeKloud</div>
+    </div>
+    <div class="cert-card fade-up">
+      <div class="cert-icon">🐧</div>
+      <div class="cert-name">Linux Shell Scripting: Project-Based</div>
+      <div class="cert-issuer">Udemy</div>
+    </div>
+    <div class="cert-card fade-up">
+      <div class="cert-icon">🔬</div>
+      <div class="cert-name">SOC Detection Lab</div>
+      <div class="cert-issuer">Self-directed · github.com/filipperichta/soar-lab-security</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner fade-up">
+    <div class="contact-text">
+      <div class="availability">
+        <div class="availability-dot"></div>
+        <span class="availability-text">Available Immediately</span>
+      </div>
+      <h2>Let's<br><em>Connect</em></h2>
+      <p>Open to permanent, contract, and remote roles in security operations, detection engineering, and incident response. Based in Doha, Qatar — eligible to work across the EU as a Slovak citizen.</p>
+      <a href="mailto:filip.perichta@gmail.com" class="btn-primary">Send Email →</a>
+    </div>
+    <div class="contact-links">
+      <a href="mailto:filip.perichta@gmail.com" class="contact-link">
+        <span class="contact-link-icon">✉</span>
+        <div class="contact-link-text">
+          <span class="contact-link-label">Email</span>
+          <span class="contact-link-value">filip.perichta@gmail.com</span>
+        </div>
+      </a>
+      <a href="https://linkedin.com/in/filip-perichta-66819515a" target="_blank" class="contact-link">
+        <span class="contact-link-icon">in</span>
+        <div class="contact-link-text">
+          <span class="contact-link-label">LinkedIn</span>
+          <span class="contact-link-value">filip-perichta-66819515a</span>
+        </div>
+      </a>
+      <a href="https://github.com/filipperichta/soar-lab-security" target="_blank" class="contact-link">
+        <span class="contact-link-icon">⬡</span>
+        <div class="contact-link-text">
+          <span class="contact-link-label">GitHub — Detection Lab</span>
+          <span class="contact-link-value">soar-lab-security</span>
+        </div>
+      </a>
+      <a href="https://github.com/filipperichta/soar-lab" target="_blank" class="contact-link">
+        <span class="contact-link-icon">⬡</span>
+        <div class="contact-link-text">
+          <span class="contact-link-label">GitHub — Infrastructure</span>
+          <span class="contact-link-value">soar-lab</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">Filip Perichta · Security Analyst · Doha, Qatar</div>
+  <div class="footer-right">filipperichta.github.io</div>
+</footer>
+
+<script>
+  // Intersection observer for fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, entry.target.dataset.delay || 0);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach((el, i) => {
+    el.dataset.delay = (i % 4) * 80;
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
